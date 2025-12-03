@@ -1,89 +1,26 @@
-# Express + TypeScript Starter
+<h1 align="center">Welcome to server-with-express 👋</h1>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <a href="#" target="_blank">
+    <img alt="License: ISC" src="https://img.shields.io/badge/License-ISC-yellow.svg" />
+  </a>
+</p>
 
-This project is a simple Express server built with TypeScript. It includes basic setup instructions, configuration files, and development scripts.
+## Install
 
-## Installation
-
-```bash
-npm init -y
-npm install express --save
-npm install -D typescript
-npx tsc --init
-npm install --save-dev @types/express
+```sh
+npm install
 ```
 
-## Project Structure
+## Run tests
 
-```
-project-folder/
-├── src/
-│   └── server.ts
-├── dist/
-├── tsconfig.json
-└── package.json
+```sh
+npm run test
 ```
 
-## tsconfig.json
+## Show your support
 
-Below is the configuration used in this project:
+Give a ⭐️ if this project helped you!
 
-```json
-{
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "strict": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true
-  }
-}
-```
-
-## Server Code (server.ts)
-
-```ts
-import express, { Request, Response } from "express";
-
-const app = express();
-const port = 5000;
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
-```
-
-## package.json Scripts
-
-```json
-{
-  "scripts": {
-    "dev": "npx tsx watch ./src/server.ts"
-  }
-}
-```
-
-## Run the Server
-
-```bash
-npm run dev
-```
-
-The server will start on port **5000**.
-
-## Notes
-
-* `tsx` is used for fast TypeScript execution in development.
-* Build output will appear in the `dist` folder when using `tsc`.
-
-Happy coding!
+***
+_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
