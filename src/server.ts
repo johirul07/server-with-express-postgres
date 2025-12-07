@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 import { Pool } from "pg";
 import dotenv from "dotenv";
-import path from "path"
+import path from "path";
 
-dotenv.config({path : path.join(process.cwd(), ".env")})
+dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 const app = express();
 const port = 5000;
@@ -52,13 +52,142 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 
-app.post("/", (req: Request, res: Response) => {
-  console.log(req.body);
+//+ post
+app.post("/users", async (req: Request, res: Response) => {
+  const { name, email } = req.body;
 
-  res.status(201).json({
-    success: true,
-    message: "APIs is working",
-  });
+  try {
+    const result = await pool.query(
+      `INSERT INTO users(name, email) VALUES($1, $2) RETURNING *`,
+      [name, email]
+    );
+
+    // console.log(result.rows[0]);
+    res.status(200).json({
+      success: true,
+      message: "Data inserted",
+      data: result.rows[0],
+    });
+    // res.send({ message: "data inserted" });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+//+ get
+
+app.get("/users", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM users`);
+
+    res.status(200).json({
+      success: true,
+      message: "Users retrieved successful",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+//+ ============================
+app.get("/users/:id", async (req: Request, res: Response) => {
+  // console.log((req.params.id))
+  // res.send("api testing...")
+
+  try {
+    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [
+      req.params.id,
+    ]);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User data Fetched",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+//+ ============================
+app.put("/users/:id", async (req: Request, res: Response) => {
+  // console.log((req.params.id))
+  // res.send("api testing...")
+
+  const { name, email } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE users SET name=$1, email=$2 WHERE id=$3 RETURNING *`,
+      [name, email, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User  updated successfully",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+//+ ============================
+app.delete("/users/:id", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`DELETE FROM users WHERE id = $1`, [
+      req.params.id,
+    ]);
+
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+        data: null,
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
 });
 
 app.listen(port, () => {
