@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { Pool } from "pg";
 import dotenv from "dotenv";
 import path from "path";
@@ -48,11 +48,19 @@ const initDB = async () => {
 
 initDB();
 
-app.get("/", (req: Request, res: Response) => {
+// + middleware===================
+
+const logger = (req: Request, res: Response, next: NextFunction) => {
+  console.log(`[${new Date().toString()}] ${req.method} ${req.path}\n`);
+  next();
+};
+
+//-user==============
+app.get("/", logger, (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 
-//+ post
+//+ post==================
 app.post("/users", async (req: Request, res: Response) => {
   const { name, email } = req.body;
 
@@ -77,7 +85,7 @@ app.post("/users", async (req: Request, res: Response) => {
   }
 });
 
-//+ get
+//+ get=====================
 
 app.get("/users", async (req: Request, res: Response) => {
   try {
@@ -97,7 +105,7 @@ app.get("/users", async (req: Request, res: Response) => {
   }
 });
 
-//+ ============================
+//+ get============================
 app.get("/users/:id", async (req: Request, res: Response) => {
   // console.log((req.params.id))
   // res.send("api testing...")
@@ -128,7 +136,7 @@ app.get("/users/:id", async (req: Request, res: Response) => {
   }
 });
 
-//+ ============================
+//+ put============================
 app.put("/users/:id", async (req: Request, res: Response) => {
   // console.log((req.params.id))
   // res.send("api testing...")
@@ -162,7 +170,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
   }
 });
 
-//+ ============================
+//+ delete============================
 app.delete("/users/:id", async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`DELETE FROM users WHERE id = $1`, [
@@ -188,6 +196,88 @@ app.delete("/users/:id", async (req: Request, res: Response) => {
       details: err,
     });
   }
+});
+
+//todo ============================
+
+//+post
+app.post("/todos", async (req: Request, res: Response) => {
+  const { user_id, title } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO todos (user_id, title) VALUES ($1, $2) RETURNING * `,
+      [user_id, title]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Todos created successfully",
+      data: result.rows[0],
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+//+ get ===========================
+
+app.get("/todos", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM todos`);
+
+    res.status(200).json({
+      success: true,
+      message: "todos retrieved successful",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+//+ single data todos get=======================
+app.get("/todos/:id", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM todos WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "todos not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "todos data fetched",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+//-404 get======================================
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.url,
+  });
 });
 
 app.listen(port, () => {
