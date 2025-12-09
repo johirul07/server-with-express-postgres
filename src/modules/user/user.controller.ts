@@ -1,0 +1,133 @@
+import { Request, Response } from "express";
+import { pool } from "../../config/db";
+import { userServices } from "./user.service";
+
+//+createUser==============
+const createUser = async (req: Request, res: Response) => {
+
+  try {
+    const result = await userServices.createUser(req.body);
+
+    // console.log(result.rows[0]);
+    res.status(200).json({
+      success: true,
+      message: "Data inserted",
+      data: result.rows[0],
+    });
+    // res.send({ message: "data inserted" });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+//+getUsers==============
+const getUsers = async (req: Request, res: Response) => {
+  try {
+    const result = await userServices.getUsers();
+
+    res.status(200).json({
+      success: true,
+      message: "Users retrieved successful",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+};
+
+//+ getSingleUser =================
+const getSingleUser = async (req: Request, res: Response) => {
+  try {
+    const result = await userServices.getSingleUser(req.params.id as string);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User data Fetched",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+};
+
+//+updateUser=============
+
+const updateUser = async (req: Request, res: Response) => {
+  const { name, email } = req.body;
+
+  try {
+    const result = await userServices.updateUser(name, email, req.params.id!);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User  updated successfully",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+};
+
+//+ deleteUser==============
+
+const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const result = await userServices.deleteUser(req.params.id!);
+
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+        data: null,
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+};
+
+export const userController = {
+  createUser,
+  getUsers,
+  getSingleUser,
+  updateUser,
+  deleteUser,
+};
