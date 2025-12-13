@@ -16,6 +16,10 @@ app.use(express.json());
 
 initDB();
 
+app.route("/").get((req, res) => {
+    res.send("Hello World!");
+});
+
 //+ user post & get $ put & delete==================
 
 app.use("/users", UserRouter);
